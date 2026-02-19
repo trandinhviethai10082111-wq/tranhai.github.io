@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURA SENSIVITY🚀</title>
+
+<style>
+body{
+margin:0;
+font-family:Segoe UI,sans-serif;
+background:#000;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+transition:0.5s;
+}
+
+.box{
+width:460px;
+max-height:90vh;
+overflow-y:auto;
+background:rgba(0,0,0,0.9);
+padding:25px;
+border-radius:20px;
+box-shadow:0 0 30px var(--mainColor);
+transition:0.5s;
+}
+
+h1{text-align:center;color:var(--mainColor);}
+.hidden{display:none;}
+
+.setting{
+margin:10px 0;
+padding:10px;
+background:rgba(255,255,255,0.05);
+border-radius:12px;
+}
+
+.status{
+font-size:12px;
+margin-top:5px;
+color:#ff4d4d;
+}
+
+.switch{
+position:relative;
+display:inline-block;
+width:50px;height:25px;
+float:right;
+}
+
+.switch input{opacity:0;width:0;height:0;}
+
+.slider{
+position:absolute;
+top:0;left:0;right:0;bottom:0;
+background:#444;border-radius:34px;
+transition:.4s;
+}
+
+.slider:before{
+position:absolute;content:"";
+height:18px;width:18px;
+left:4px;bottom:3.5px;
+background:white;border-radius:50%;
+transition:.4s;
+}
+
+input:checked + .slider{
+background:var(--mainColor);
+box-shadow:0 0 10px var(--mainColor);
+}
+
+input:checked + .slider:before{
+transform:translateX(24px);
+}
+
+button,select,input[type=password]{
+width:100%;
+padding:10px;
+border:none;
+border-radius:10px;
+margin-top:10px;
+font-weight:bold;
+}
+
+button{
+background:var(--mainColor);
+cursor:pointer;
+}
+
+.loading{
+text-align:center;
+font-size:18px;
+color:var(--mainColor);
+animation:blink 1s infinite;
+}
+
+@keyframes blink{
+50%{opacity:0.3;}
+}
+</style>
+</head>
+<body style="--mainColor:#00f2ff">
+
+<!-- LOGIN -->
+<div class="box" id="login">
+<h1>🔒 AURA SENSIVITY🚀</h1>
+<input type="password" id="pass" placeholder="Nhập mật khẩu...">
+<button onclick="login()">Đăng Nhập</button>
+</div>
+
+<!-- LAUNCHER -->
+<div class="box hidden" id="launcher">
+<h1>🎮 GAME LAUNCHER</h1>
+
+<div class="setting">
+Chọn Game:
+<select id="gameSelect">
+<option value="ff">🔥 Free Fire</option>
+<option value="ffmax">💎 Free Fire MAX</option>
+</select>
+</div>
+
+<button onclick="launchGame()">🚀 Khởi động</button>
+<button onclick="logout()">Đăng Xuất</button>
+</div>
+
+<!-- LOADING -->
+<div class="box hidden" id="loadingBox">
+<div class="loading">⏳ Đang khởi động...</div>
+</div>
+
+<!-- PANEL -->
+<div class="box hidden" id="panel">
+<h1 id="panelTitle">⚙️ CONTROL PANEL</h1>
+<div id="settings"></div>
+<button onclick="backToLauncher()">⬅ Quay lại</button>
+</div>
+
+<script>
+const features=[
+["precision","🎯 Precision Assist"],
+["crosshair","🚀 Crosshair Control"],
+["lock","🔒 Smart Lock"],
+["ai","🧠 AI Boost"],
+["response","⚡ Ultra Response"],
+["device","📱 Device Optimize"],
+["smooth","🖱️ Smooth Tracking"],
+["balance","🎮 Game Balance"],
+["power","🔥 Power Mode"],
+["night","🌙 Night Vision UI"],
+["guard","🛡️ Stability Guard"],
+["signal","📡 Signal Sync"],
+["sens","🎚️ Sensitivity Plus"],
+["performance","💎 Performance Max"],
+["focus","🌀 Dynamic Focus"]
+];
+
+function login(){
+if(document.getElementById("pass").value==="tranhai-108"){
+document.getElementById("login").classList.add("hidden");
+document.getElementById("launcher").classList.remove("hidden");
+}else alert("Sai mật khẩu!");
+}
+
+function logout(){location.reload();}
+
+function launchGame(){
+let game=document.getElementById("gameSelect").value;
+document.getElementById("launcher").classList.add("hidden");
+document.getElementById("loadingBox").classList.remove("hidden");
+
+setTimeout(()=>{
+document.getElementById("loadingBox").classList.add("hidden");
+document.getElementById("panel").classList.remove("hidden");
+
+if(game==="ff"){
+document.body.style.setProperty("--mainColor","#ff3c00");
+document.getElementById("panelTitle").innerText="🔥 Free Fire Panel";
+}else{
+document.body.style.setProperty("--mainColor","#00f2ff");
+document.getElementById("panelTitle").innerText="💎 Free Fire MAX Panel";
+}
+
+init();
+},3000);
+}
+
+function backToLauncher(){
+document.getElementById("panel").classList.add("hidden");
+document.getElementById("launcher").classList.remove("hidden");
+}
+
+function init(){
+let container=document.getElementById("settings");
+container.innerHTML="";
+features.forEach(f=>{
+container.innerHTML+=`
+<div class="setting">
+${f[1]}
+<label class="switch">
+<input type="checkbox" onchange="toggleStatus(this,'${f[0]}Status')">
+<span class="slider"></span>
+</label>
+<div class="status" id="${f[0]}Status">Đã tắt ❌</div>
+</div>
+`;
+});
+}
+
+function toggleStatus(el,statusId){
+let status=document.getElementById(statusId);
+if(el.checked){
+status.innerText="Đã bật ✅";
+status.style.color="#00ff88";
+}else{
+status.innerText="Đã tắt ❌";
+status.style.color="#ff4d4d";
+}
+}
+</script>
+
+</body>
+</html>
