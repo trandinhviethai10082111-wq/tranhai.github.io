@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PRECIX TECH v1.0 - VIP Gaming Control Panel</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            font-family: 'Rajdhani', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background-color: #07080c;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(15, 17, 26, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 42, 77, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+        }
+
+        .glass-card {
+            background: rgba(22, 25, 38, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:active {
+            transform: scale(0.98);
+        }
+
+        .neon-glow-red {
+            box-shadow: 0 0 18px rgba(255, 42, 77, 0.5);
+        }
+
+        .neon-text-red {
+            color: #ff2a4d;
+            text-shadow: 0 0 10px rgba(255, 42, 77, 0.6);
+        }
+
+        .switch-checkbox:checked + .switch-label {
+            background-color: #ff2a4d;
+            box-shadow: 0 0 12px rgba(255, 42, 77, 0.6);
+        }
+
+        .switch-checkbox:checked + .switch-label .switch-ball {
+            transform: translateX(1.5rem);
+            background-color: #ffffff;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            height: 8px;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: #ff2a4d;
+            cursor: pointer;
+            box-shadow: 0 0 12px #ff2a4d;
+            border: 2px solid #ffffff;
+            transition: transform 0.1s ease;
+        }
+
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.25);
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 42, 77, 0.4);
+            border-radius: 4px;
+        }
+
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .btn-press {
+            transition: all 0.15s ease;
+        }
+        .btn-press:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-red-500 selection:text-white">
+
+    <!-- Flat 2D Colored Bubbles Background Canvas -->
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- VIP ACCESS KEY MODAL OVERLAY -->
+    <div id="key-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md transition-opacity duration-500">
+        <div id="key-card" class="glass-panel w-full max-w-sm rounded-3xl p-6 border-2 border-red-500/40 text-center space-y-5 shadow-2xl relative overflow-hidden">
+            
+            <div class="relative mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-rose-900 flex items-center justify-center text-white text-2xl neon-glow-red border border-red-400/50">
+                <i class="fa-solid fa-lock animate-pulse"></i>
+            </div>
+
+            <div class="space-y-1">
+                <h2 class="font-orbitron text-lg font-black tracking-wider text-white">
+                    PRECIX <span class="neon-text-red">SECURITY</span>
+                </h2>
+                <p class="text-xs text-gray-400">Nhập Key VIP để giải mã & mở Menu điều khiển</p>
+            </div>
+
+            <div id="input-container" class="space-y-2">
+                <div class="relative flex items-center">
+                    <span class="absolute left-3.5 text-gray-400 text-sm">
+                        <i class="fa-solid fa-key"></i>
+                    </span>
+                    <input type="password" id="key-input" placeholder="Nhập Key mật khẩu..." 
+                           class="w-full pl-10 pr-10 py-3 bg-black/60 rounded-xl border border-red-500/30 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 font-orbitron transition-all">
+                    <button type="button" id="toggle-key-visibility" class="absolute right-3.5 text-gray-400 hover:text-white text-sm focus:outline-none">
+                        <i id="key-eye-icon" class="fa-solid fa-eye-slash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button id="btn-submit-key" class="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-orbitron font-bold text-sm tracking-wider shadow-lg shadow-red-600/30 border border-red-400/40 btn-press flex items-center justify-center gap-2">
+                <i class="fa-solid fa-shield-halved"></i> KÍCH HOẠT / MỞ MENU
+            </button>
+
+            <p class="text-[11px] text-gray-500">
+                Liên hệ Admin Zalo: <span class="text-red-400 font-bold">0905774087</span> để lấy Key
+            </p>
+
+        </div>
+    </div>
+
+    <!-- Main UI Layout Container -->
+    <div id="main-app" class="relative z-10 flex flex-col min-h-screen max-w-md mx-auto w-full pb-20 shadow-2xl">
+        
+        <!-- HEADER -->
+        <header class="glass-panel sticky top-0 z-30 px-4 py-3 flex items-center justify-between border-b border-red-500/20">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-rose-900 flex items-center justify-center neon-glow-red border border-red-400/40">
+                    <i class="fa-solid fa-crosshair text-white text-lg animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="font-orbitron text-base font-black tracking-wider text-white flex items-center gap-1.5">
+                        PRECIX <span class="neon-text-red">TECH</span>
+                    </h1>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">v1.0 VIP PANEL</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <div class="px-2.5 py-1 rounded-lg bg-black/40 border border-red-500/30 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-bolt text-[11px] text-amber-400"></i>
+                    <span id="fps-val" class="font-orbitron text-xs font-bold text-emerald-400">60</span>
+                    <span class="text-[10px] text-gray-400 font-bold">FPS</span>
+                </div>
+
+                <button id="sound-toggle-btn" class="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 btn-press">
+                    <i id="sound-icon" class="fa-solid fa-volume-high text-sm text-red-400"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Toast Notification Container -->
+        <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col gap-2 w-11/12 max-w-xs"></div>
+
+        <!-- MAIN TABS CONTAINER -->
+        <main class="flex-1 p-4 space-y-4">
+
+            <!-- TAB 1: FUNCTION -->
+            <section id="tab-func" class="tab-content active space-y-4">
+                
+                <div class="glass-panel rounded-2xl p-3.5 flex items-center justify-between border border-red-500/20">
+                    <div>
+                        <h2 class="font-orbitron text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-red-400"></i> Drag Master
+                        </h2>
+                        <p class="text-xs text-gray-400">Tối ưu thao tác vuốt & kéo tâm headshot</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="btn-enable-all" class="px-3 py-1.5 rounded-lg bg-red-600/30 hover:bg-red-600/50 border border-red-500/50 text-red-200 text-xs font-bold btn-press">
+                            Bật tất cả
+                        </button>
+                        <button id="btn-disable-all" class="px-3 py-1.5 rounded-lg bg-gray-800/60 hover:bg-gray-700/60 border border-gray-600/40 text-gray-300 text-xs font-bold btn-press">
+                            Tắt tất cả
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 10 Feature Switches -->
+                <div class="grid grid-cols-1 gap-2.5">
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-hand-pointer text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">DragMaster</h3>
+                                <p class="text-[11px] text-gray-400">Trợ lực vuốt tâm mượt theo đường cong</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-dragmaster">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-wind text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">AimFlow</h3>
+                                <p class="text-[11px] text-gray-400">Ổn định dòng dịch chuyển đường đạn</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-aimflow">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-bullseye text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">HeadLock</h3>
+                                <p class="text-[11px] text-gray-400">Ghim vị trí tầm ngực đến vùng đầu</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-headlock">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-rocket text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">DragBoost</h3>
+                                <p class="text-[11px] text-gray-400">Gia tốc tốc độ kéo tâm phản hồi cao</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-dragboost">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-magnet text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">AimSnap</h3>
+                                <p class="text-[11px] text-gray-400">Khóa nhanh vị trí khi bấm nút ngắm</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-aimsnap">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-circle-dot text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">Crosshair Pro</h3>
+                                <p class="text-[11px] text-gray-400">Cố định tâm bắn không bị nở rộng</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-crosshair">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-bolt-lightning text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">FlickAssist</h3>
+                                <p class="text-[11px] text-gray-400">Hỗ trợ vẩy tâm phản xạ cận chiến</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-flickassist">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-eye text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">AimTrack</h3>
+                                <p class="text-[11px] text-gray-400">Theo dõi mục tiêu di chuyển ngang</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-aimtrack">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-arrows-rotate text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">DragSync</h3>
+                                <p class="text-[11px] text-gray-400">Đồng bộ tần số vuốt theo FPS máy</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-dragsync">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-3 flex items-center justify-between hover:border-red-500/30">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                                <i class="fa-solid fa-gauge-high text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-gray-100">Precision Drag</h3>
+                                <p class="text-[11px] text-gray-400">Độ chính xác tuyệt đối điểm vuốt</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only switch-checkbox func-toggle" id="func-precisiondrag">
+                            <div class="w-11 h-6 bg-gray-800 rounded-full switch-label transition-all duration-300 relative border border-white/10">
+                                <div class="switch-ball absolute top-0.5 left-0.5 w-5 h-5 bg-gray-400 rounded-full transition-all duration-300"></div>
+                            </div>
+                        </label>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TAB 2: BOOST & GAME LAUNCHER -->
+            <section id="tab-boost" class="tab-content space-y-4">
+                
+                <!-- SECTION 1: GAME LAUNCHER -->
+                <div class="glass-panel rounded-2xl p-4 border border-red-500/30 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-orbitron text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-gamepad text-red-400"></i> Chọn & Khởi Chạy Game
+                        </h2>
+                        <span class="text-[10px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded border border-red-500/30 font-bold">DIRECT LAUNCH</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="btn-launch-ff" class="glass-card rounded-xl p-3 text-left border border-red-500/20 hover:border-red-500/60 hover:bg-red-500/10 relative overflow-hidden group btn-press">
+                            <div class="absolute -right-3 -bottom-3 text-red-500/10 text-5xl group-hover:text-red-500/20 transition-all">
+                                <i class="fa-solid fa-fire"></i>
+                            </div>
+                            <div class="w-8 h-8 rounded-lg bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 mb-2 font-bold">
+                                FF
+                            </div>
+                            <h3 class="font-orbitron text-xs font-black text-white">FREE FIRE</h3>
+                            <p class="text-[10px] text-gray-400 truncate mt-0.5">com.dts.freefireth</p>
+                            <div class="mt-2 text-[10px] font-bold text-red-400 flex items-center gap-1">
+                                MỞ GAME <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                            </div>
+                        </button>
+
+                        <button id="btn-launch-ffmax" class="glass-card rounded-xl p-3 text-left border border-amber-500/20 hover:border-amber-500/60 hover:bg-amber-500/10 relative overflow-hidden group btn-press">
+                            <div class="absolute -right-3 -bottom-3 text-amber-500/10 text-5xl group-hover:text-amber-500/20 transition-all">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <div class="w-8 h-8 rounded-lg bg-amber-600/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-2 font-bold">
+                                MAX
+                            </div>
+                            <h3 class="font-orbitron text-xs font-black text-white">FREE FIRE MAX</h3>
+                            <p class="text-[10px] text-gray-400 truncate mt-0.5">com.dts.freefiremax</p>
+                            <div class="mt-2 text-[10px] font-bold text-amber-400 flex items-center gap-1">
+                                MỞ GAME <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: BOOST SENSITIVITY SLIDERS (WITH AUDIO TICK SOUND FIX) -->
+                <div class="glass-panel rounded-2xl p-4 border border-red-500/20 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="font-orbitron text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-red-400"></i> Tinh Chỉnh Độ Nhạy & Boost
+                            </h2>
+                            <p class="text-xs text-gray-400">Các tham số tùy biến sâu (Mặc định: 0%)</p>
+                        </div>
+                        <button id="btn-reset-all-sliders" class="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300 text-xs font-bold btn-press">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Về 0%
+                        </button>
+                    </div>
+
+                    <div class="space-y-4 pt-1">
+                        
+                        <!-- 1. Sensivity -->
+                        <div class="glass-card p-3 rounded-xl space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-gray-200">Sensivity (Độ Nhạy Mới)</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="val-sensivity" class="font-orbitron font-bold text-red-400">0%</span>
+                                    <button class="reset-single-slider text-[10px] text-gray-400 hover:text-white underline" data-target="slider-sensivity">0%</button>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-sensivity" min="0" max="100" value="0" class="w-full boost-slider">
+                        </div>
+
+                        <!-- 2. Shake Fix -->
+                        <div class="glass-card p-3 rounded-xl space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-gray-200">Shake Fix (Giảm Rung Tâm)</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="val-shakefix" class="font-orbitron font-bold text-red-400">0%</span>
+                                    <button class="reset-single-slider text-[10px] text-gray-400 hover:text-white underline" data-target="slider-shakefix">0%</button>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-shakefix" min="0" max="100" value="0" class="w-full boost-slider">
+                        </div>
+
+                        <!-- 3. Overshoot Fix -->
+                        <div class="glass-card p-3 rounded-xl space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-gray-200">Overshoot Fix (Chống Vượt Đầu)</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="val-overshoot" class="font-orbitron font-bold text-red-400">0%</span>
+                                    <button class="reset-single-slider text-[10px] text-gray-400 hover:text-white underline" data-target="slider-overshoot">0%</button>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-overshoot" min="0" max="100" value="0" class="w-full boost-slider">
+                        </div>
+
+                        <!-- 4. Head Lock -->
+                        <div class="glass-card p-3 rounded-xl space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-gray-200">Head Lock (Ghì Tâm Đầu)</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="val-headlock" class="font-orbitron font-bold text-red-400">0%</span>
+                                    <button class="reset-single-slider text-[10px] text-gray-400 hover:text-white underline" data-target="slider-headlock">0%</button>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-headlock" min="0" max="100" value="0" class="w-full boost-slider">
+                        </div>
+
+                        <!-- 5. Aim Control -->
+                        <div class="glass-card p-3 rounded-xl space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-gray-200">Aim Control (Định Hướng Kéo)</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="val-aimcontrol" class="font-orbitron font-bold text-red-400">0%</span>
+                                    <button class="reset-single-slider text-[10px] text-gray-400 hover:text-white underline" data-target="slider-aimcontrol">0%</button>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-aimcontrol" min="0" max="100" value="0" class="w-full boost-slider">
+                        </div>
+
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- TAB 3: ADMIN SUPPORT -->
+            <section id="tab-admin" class="tab-content space-y-4">
+                
+                <div class="glass-panel rounded-2xl p-4 border border-red-500/20 text-center space-y-3">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-900 mx-auto flex items-center justify-center text-2xl text-white neon-glow-red border border-red-400/40">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-orbitron text-base font-bold text-white">PRECIX TECH SUPPORT</h2>
+                        <p class="text-xs text-gray-400">Liên hệ trực tiếp Admin để được giải đáp & cấp bản quyền VIP</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+
+                    <!-- ZALO CARD -->
+                    <div class="glass-card rounded-2xl p-4 border border-blue-500/20 hover:border-blue-500/40 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-400/40 flex items-center justify-center text-blue-400 font-bold text-sm">
+                                    ZALO
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white">Zalo Support</h3>
+                                    <p class="text-xs text-blue-300 font-orbitron font-semibold">0905774087</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold border border-blue-500/30">ONLINE</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button id="btn-copy-zalo" class="px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/40 text-blue-200 text-xs font-bold flex items-center justify-center gap-1.5 btn-press">
+                                <i class="fa-solid fa-copy"></i> Sao chép
+                            </button>
+                            <a href="https://zalo.me/0905774087" target="_blank" class="px-3 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 btn-press shadow-lg shadow-blue-600/30">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Mở Trang
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- TIKTOK CARD -->
+                    <div class="glass-card rounded-2xl p-4 border border-rose-500/20 hover:border-rose-500/40 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-rose-600/20 border border-rose-400/40 flex items-center justify-center text-rose-400">
+                                    <i class="fa-brands fa-tiktok text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white">TikTok Admin</h3>
+                                    <p class="text-xs text-rose-300 font-orbitron font-semibold">@rybodpi</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-bold border border-rose-500/30">OFFICIAL</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button id="btn-copy-tiktok" class="px-3 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500/40 text-rose-200 text-xs font-bold flex items-center justify-center gap-1.5 btn-press">
+                                <i class="fa-solid fa-copy"></i> Sao chép ID
+                            </button>
+                            <a href="https://www.tiktok.com/@rybodpi" target="_blank" class="px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 btn-press shadow-lg shadow-rose-600/30">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Xem Channel
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-black/40 border border-white/5 text-center space-y-1">
+                        <p class="text-[11px] text-gray-400">Device Status: <span class="text-emerald-400 font-bold">VIP ACTIVATED</span></p>
+                        <p class="text-[10px] text-gray-500">Security Encryption: AES-256 Bit Dynamic Engine</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- FIXED BOTTOM NAVIGATION BAR -->
+        <nav class="glass-panel fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-40 border-t border-red-500/20 px-3 py-2">
+            <div class="grid grid-cols-3 gap-1">
+                
+                <button class="nav-tab-btn active flex flex-col items-center py-1.5 rounded-xl transition-all duration-300 text-red-500" data-tab="tab-func">
+                    <i class="fa-solid fa-sliders text-base mb-0.5"></i>
+                    <span class="text-[11px] font-bold font-orbitron">FUNC</span>
+                </button>
+
+                <button class="nav-tab-btn flex flex-col items-center py-1.5 rounded-xl transition-all duration-300 text-gray-400 hover:text-gray-200" data-tab="tab-boost">
+                    <i class="fa-solid fa-rocket text-base mb-0.5"></i>
+                    <span class="text-[11px] font-bold font-orbitron">BOOST</span>
+                </button>
+
+                <button class="nav-tab-btn flex flex-col items-center py-1.5 rounded-xl transition-all duration-300 text-gray-400 hover:text-gray-200" data-tab="tab-admin">
+                    <i class="fa-solid fa-user-shield text-base mb-0.5"></i>
+                    <span class="text-[11px] font-bold font-orbitron">ADMIN</span>
+                </button>
+
+            </div>
+        </nav>
+
+    </div>
+
+    <script>
+        /* Web Audio API Synthesizer with Autoplay Fix & Slider Tick Audio */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            // Slider Drag Sound Tick Effect (Frequency shifts with percentage 0-100%)
+            playSliderTick(val = 0) {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    // Pitch shifts up as percentage increases (280Hz - 1100Hz)
+                    const freq = 280 + (val * 8.2);
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                } catch(e) {}
+            }
+
+            playBeep(freq = 600, duration = 0.08, type = 'sine') {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, now);
+                    
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + duration);
+                } catch(e) {}
+            }
+
+            playTabSwitch() {
+                this.playBeep(800, 0.05, 'triangle');
+            }
+
+            playToggleOn() {
+                this.playBeep(980, 0.09, 'sine');
+            }
+
+            playToggleOff() {
+                this.playBeep(350, 0.09, 'sine');
+            }
+
+            playSuccess() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.24); // C6
+
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } catch(e) {}
+            }
+
+            playError() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(180, now + 0.1);
+
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } catch(e) {}
+            }
+
+            playLaunchSound() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.25);
+                    
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } catch(e) {}
+            }
+        }
+
+        const audio = new SoundEngine();
+
+        // Unlock audio context on any user interaction (Mobile Browser Autoplay policy fix)
+        function unlockAudio() {
+            audio.init();
+        }
+        window.addEventListener('touchstart', unlockAudio, { passive: true });
+        window.addEventListener('mousedown', unlockAudio, { passive: true });
+
+        const VIP_SECRET_KEY = "adminsupportrybo";
+
+        const keyModal = document.getElementById('key-modal');
+        const keyInput = document.getElementById('key-input');
+        const btnSubmitKey = document.getElementById('btn-submit-key');
+        const toggleKeyVisibilityBtn = document.getElementById('toggle-key-visibility');
+        const keyEyeIcon = document.getElementById('key-eye-icon');
+        const inputContainer = document.getElementById('input-container');
+
+        toggleKeyVisibilityBtn.addEventListener('click', () => {
+            if (keyInput.type === 'password') {
+                keyInput.type = 'text';
+                keyEyeIcon.className = 'fa-solid fa-eye';
+            } else {
+                keyInput.type = 'password';
+                keyEyeIcon.className = 'fa-solid fa-eye-slash';
+            }
+        });
+
+        function verifyVipKey() {
+            const enteredKey = keyInput.value.trim();
+
+            if (enteredKey === VIP_SECRET_KEY) {
+                audio.playSuccess();
+                showToast("Đang tối ưu app", "success");
+
+                keyModal.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    keyModal.style.display = 'none';
+                }, 500);
+
+            } else {
+                audio.playError();
+                showToast("Mật khẩu không chính xác!", "warning");
+                
+                inputContainer.classList.remove('animate-shake');
+                void inputContainer.offsetWidth;
+                inputContainer.classList.add('animate-shake');
+            }
+        }
+
+        btnSubmitKey.addEventListener('click', verifyVipKey);
+        keyInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyVipKey();
+        });
+
+        let frameCount = 0;
+        let lastFpsTime = performance.now();
+        const fpsValEl = document.getElementById('fps-val');
+
+        function updateFPS() {
+            const now = performance.now();
+            frameCount++;
+            if (now - lastFpsTime >= 1000) {
+                const fps = Math.round((frameCount * 1000) / (now - lastFpsTime));
+                fpsValEl.textContent = fps;
+                frameCount = 0;
+                lastFpsTime = now;
+            }
+            requestAnimationFrame(updateFPS);
+        }
+        requestAnimationFrame(updateFPS);
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const borderColors = type === 'success' ? 'border-emerald-500/50 bg-emerald-950/90 text-emerald-200' :
+                               type === 'warning' ? 'border-amber-500/50 bg-amber-950/90 text-amber-200' :
+                               'border-red-500/50 bg-gray-950/90 text-white';
+
+            toast.className = `glass-panel rounded-xl px-4 py-3 text-xs font-semibold border ${borderColors} shadow-2xl flex items-center justify-between transition-all duration-300 opacity-0 translate-y-2`;
+            
+            toast.innerHTML = `
+                <div class="flex items-center space-x-2.5">
+                    <i class="${type === 'success' ? 'fa-solid fa-circle-check text-emerald-400' : 'fa-solid fa-circle-exclamation text-amber-400'} text-sm"></i>
+                    <span class="font-bold">${message}</span>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        const tabBtns = document.querySelectorAll('.nav-tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTabId = btn.getAttribute('data-tab');
+                audio.playTabSwitch();
+
+                tabBtns.forEach(b => {
+                    b.classList.remove('text-red-500', 'active');
+                    b.classList.add('text-gray-400');
+                });
+                btn.classList.add('text-red-500', 'active');
+                btn.classList.remove('text-gray-400');
+
+                tabContents.forEach(content => {
+                    if (content.id === targetTabId) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        const soundBtn = document.getElementById('sound-toggle-btn');
+        const soundIcon = document.getElementById('sound-icon');
+
+        soundBtn.addEventListener('click', () => {
+            audio.enabled = !audio.enabled;
+            if (audio.enabled) {
+                soundIcon.className = 'fa-solid fa-volume-high text-sm text-red-400';
+                showToast('Đã bật âm thanh hiệu ứng');
+                audio.playBeep(880, 0.1);
+            } else {
+                soundIcon.className = 'fa-solid fa-volume-xmark text-sm text-gray-500';
+                showToast('Đã tắt âm thanh hiệu ứng');
+            }
+        });
+
+        const funcToggles = document.querySelectorAll('.func-toggle');
+        const btnEnableAll = document.getElementById('btn-enable-all');
+        const btnDisableAll = document.getElementById('btn-disable-all');
+
+        funcToggles.forEach(toggle => {
+            toggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    audio.playToggleOn();
+                    showToast(`Kích hoạt: ${e.target.id.replace('func-', '').toUpperCase()}`, 'success');
+                } else {
+                    audio.playToggleOff();
+                }
+            });
+        });
+
+        btnEnableAll.addEventListener('click', () => {
+            audio.playToggleOn();
+            funcToggles.forEach(t => t.checked = true);
+            showToast('Đã BẬT TẤT CẢ 10 chức năng tối ưu DragMaster', 'success');
+        });
+
+        btnDisableAll.addEventListener('click', () => {
+            audio.playToggleOff();
+            funcToggles.forEach(t => t.checked = false);
+            showToast('Đã TẮT TẤT CẢ chức năng');
+        });
+
+        // Boost Sliders Configuration & Audio Fix
+        const sliders = [
+            { id: 'slider-sensivity', valId: 'val-sensivity' },
+            { id: 'slider-shakefix', valId: 'val-shakefix' },
+            { id: 'slider-overshoot', valId: 'val-overshoot' },
+            { id: 'slider-headlock', valId: 'val-headlock' },
+            { id: 'slider-aimcontrol', valId: 'val-aimcontrol' }
+        ];
+
+        sliders.forEach(s => {
+            const sliderEl = document.getElementById(s.id);
+            const valEl = document.getElementById(s.valId);
+            let lastValue = parseInt(sliderEl.value, 10);
+
+            const handleSliderInput = (e) => {
+                unlockAudio(); // Resume AudioContext if suspended
+                const currentVal = parseInt(e.target.value, 10);
+                valEl.textContent = `${currentVal}%`;
+
+                // Play audio tick whenever slider value changes
+                if (currentVal !== lastValue) {
+                    audio.playSliderTick(currentVal);
+                    lastValue = currentVal;
+                }
+            };
+
+            sliderEl.addEventListener('input', handleSliderInput);
+            sliderEl.addEventListener('touchstart', unlockAudio, { passive: true });
+            sliderEl.addEventListener('mousedown', unlockAudio, { passive: true });
+        });
+
+        document.querySelectorAll('.reset-single-slider').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                unlockAudio();
+                const targetId = e.target.getAttribute('data-target');
+                const targetSlider = document.getElementById(targetId);
+                if (targetSlider) {
+                    targetSlider.value = 0;
+                    targetSlider.dispatchEvent(new Event('input'));
+                    audio.playBeep(400, 0.06);
+                }
+            });
+        });
+
+        document.getElementById('btn-reset-all-sliders').addEventListener('click', () => {
+            unlockAudio();
+            sliders.forEach(s => {
+                const sliderEl = document.getElementById(s.id);
+                sliderEl.value = 0;
+                sliderEl.dispatchEvent(new Event('input'));
+            });
+            audio.playBeep(400, 0.08);
+            showToast('Đã đặt lại tất cả thông số về 0%');
+        });
+
+        // Game Launchers
+        const btnLaunchFF = document.getElementById('btn-launch-ff');
+        const btnLaunchFFMax = document.getElementById('btn-launch-ffmax');
+
+        function launchGame(packageName, scheme, gameName) {
+            unlockAudio();
+            audio.playLaunchSound();
+            showToast(`Đang khởi chạy ${gameName}...`, 'success');
+
+            setTimeout(() => {
+                window.location.href = scheme;
+            }, 300);
+        }
+
+        btnLaunchFF.addEventListener('click', () => {
+            launchGame('com.dts.freefireth', 'freefire://', 'Free Fire');
+        });
+
+        btnLaunchFFMax.addEventListener('click', () => {
+            launchGame('com.dts.freefiremax', 'freefiremax://', 'Free Fire MAX');
+        });
+
+        function copyToClipboard(text, label) {
+            unlockAudio();
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+
+            audio.playBeep(800, 0.08);
+            showToast(`Đã sao chép ${label}: ${text}`, 'success');
+        }
+
+        document.getElementById('btn-copy-zalo').addEventListener('click', () => {
+            copyToClipboard('0905774087', 'Zalo');
+        });
+
+        document.getElementById('btn-copy-tiktok').addEventListener('click', () => {
+            copyToClipboard('rybodpi', 'TikTok ID');
+        });
+
+        /* FLAT 2D COLORED BUBBLES CANVAS ENGINE */
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        class FlatBubble2D {
+            constructor() {
+                this.reset(true);
+            }
+
+            reset(initial = false) {
+                this.x = Math.random() * width;
+                this.y = initial ? Math.random() * height : height + Math.random() * 20;
+                this.radius = Math.random() * 16 + 5;
+                this.vy = Math.random() * 0.9 + 0.3;
+                this.sway = Math.random() * Math.PI * 2;
+                this.swaySpeed = Math.random() * 0.02 + 0.008;
+                this.alpha = Math.random() * 0.4 + 0.15;
+                this.hasOutline = Math.random() > 0.45;
+
+                const colors = [
+                    `rgba(255, 42, 77, `,
+                    `rgba(225, 29, 72, `,
+                    `rgba(244, 63, 94, `,
+                    `rgba(159, 18, 57, `
+                ];
+                this.colorBase = colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            update() {
+                this.y -= this.vy;
+                this.sway += this.swaySpeed;
+                this.x += Math.sin(this.sway) * 0.4;
+
+                if (this.y < -this.radius * 2) {
+                    this.reset(false);
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                
+                ctx.fillStyle = `${this.colorBase}${this.alpha})`;
+                ctx.fill();
+
+                if (this.hasOutline) {
+                    ctx.lineWidth = 1.2;
+                    ctx.strokeStyle = `${this.colorBase}${Math.min(1, this.alpha + 0.25)})`;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        const flatBubbles = Array.from({ length: 30 }, () => new FlatBubble2D());
+
+        function animateBg() {
+            ctx.clearRect(0, 0, width, height);
+
+            ctx.fillStyle = 'rgba(7, 8, 12, 0.7)';
+            ctx.fillRect(0, 0, width, height);
+
+            flatBubbles.forEach(bubble => {
+                bubble.update();
+                bubble.draw();
+            });
+
+            requestAnimationFrame(animateBg);
+        }
+
+        window.onload = () => {
+            animateBg();
+        };
+    </script>
+</body>
+</html>
